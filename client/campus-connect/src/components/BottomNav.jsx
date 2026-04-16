@@ -1,39 +1,47 @@
-import { Home, Users, Calendar, FileText, User } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Home, Calendar, Users, FileText, User } from "lucide-react";
 
-export default function BottomNav() {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const tabs = [
-    { name: "Home", icon: Home, path: "/dashboard/home" },
-    { name: "Collaborate", icon: Users, path: "/dashboard/collaborate" },
-    { name: "Events", icon: Calendar, path: "/dashboard/events" },
-    { name: "Resume", icon: FileText, path: "/dashboard/resume" },
-    { name: "Profile", icon: User, path: "/dashboard/profile" },
-  ];
-
+export default function BottomNav({ navigate }) {
   return (
-    <div className="flex justify-around items-center bg-white shadow-lg border-t py-3 fixed bottom-0 w-full">
+    <div className="fixed bottom-0 left-0 w-full bg-white border-t flex justify-around py-2 shadow-sm">
 
-      {tabs.map((tab, i) => {
-        const Icon = tab.icon;
-        const active = location.pathname === tab.path;
+      <button onClick={() => navigate("/dashboard/home")} className="navItem">
+        <Home size={20} />
+        <span>Home</span>
+      </button>
 
-        return (
-          <button
-            key={i}
-            onClick={() => navigate(tab.path)}
-            className={`flex flex-col items-center text-xs transition ${
-              active ? "text-indigo-600 scale-110" : "text-gray-500"
-            }`}
-          >
-            <Icon size={20} />
-            <span>{tab.name}</span>
-          </button>
-        );
-      })}
+      <button onClick={() => navigate("/dashboard/events")} className="navItem">
+        <Calendar size={20} />
+        <span>Events</span>
+      </button>
 
+      <button onClick={() => navigate("/dashboard/collaborate")} className="navItem">
+        <Users size={20} />
+        <span>Collab</span>
+      </button>
+
+      <button onClick={() => navigate("/dashboard/resume")} className="navItem">
+        <FileText size={20} />
+        <span>Resume</span>
+      </button>
+
+      <button onClick={() => navigate("/dashboard/profile")} className="navItem">
+        <User size={20} />
+        <span>Profile</span>
+      </button>
+
+      <style>{`
+        .navItem {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          font-size: 11px;
+          color: #555;
+        }
+
+        .navItem:active {
+          color: #2563eb;
+        }
+      `}</style>
     </div>
   );
 }

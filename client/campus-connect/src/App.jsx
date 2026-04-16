@@ -13,6 +13,9 @@ import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import Mentor from "./pages/Mentor";
 
+// OPTIONAL (create later if needed)
+// import Settings from "./pages/Settings";
+
 function App() {
   return (
     <BrowserRouter>
@@ -24,18 +27,24 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/mentor" element={<Mentor />} />
-        
+
         {/* MAIN APP */}
         <Route path="/dashboard" element={<Dashboard />}>
+
+          {/* CHILD ROUTES */}
           <Route path="home" element={<Home />} />
           <Route path="events" element={<Events />} />
           <Route path="collaborate" element={<Collaborate />} />
           <Route path="resume" element={<Resume />} />
           <Route path="profile" element={<Profile />} />
 
-          {/* default route inside dashboard */}
+          {/* DEFAULT ROUTE */}
           <Route index element={<Navigate to="home" replace />} />
+
         </Route>
+
+        {/* FALLBACK (optional but recommended) */}
+        <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>
     </BrowserRouter>

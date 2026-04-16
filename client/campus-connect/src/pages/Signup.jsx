@@ -44,34 +44,34 @@ export default function Signup() {
         password: form.password,
         phone: form.phone,
         role: form.role,
-        captcha: captcha || "mobile-bypass"
+        captcha: captcha || "mobile-bypass",
       });
 
       setMessage("Account created successfully!");
 
-      setTimeout(() => {
-        navigate("/login");
-      }, 1500);
-
+      setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
-      console.log(err.response?.data);
       setError(err.response?.data?.error || "Signup failed");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
 
-      <div className="w-full max-w-md bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6">
 
-        <h2 className="text-2xl font-bold text-white text-center mb-4">
-          Create Account 🚀
-        </h2>
+        <div className="text-center mb-6">
+          <div className="text-3xl">🎓</div>
+          <h2 className="text-2xl font-bold mt-2">Create Account</h2>
+          <p className="text-gray-500 text-sm">
+            Sign up to your Student Lifecycle account
+          </p>
+        </div>
 
-        {message && <p className="text-green-300 text-center mb-3">{message}</p>}
-        {error && <p className="text-red-300 text-center mb-3">{error}</p>}
+        {message && <p className="text-green-600 text-center mb-3">{message}</p>}
+        {error && <p className="text-red-500 text-center mb-3">{error}</p>}
 
-        <div className="space-y-3">
+        <div className="space-y-4">
 
           <input className="input" name="fullName" placeholder="Full Name" onChange={handleChange} />
           <input className="input" name="email" placeholder="Email" onChange={handleChange} />
@@ -85,54 +85,49 @@ export default function Signup() {
           <input className="input" type="password" name="password" placeholder="Password" onChange={handleChange} />
           <input className="input" type="password" name="confirmPassword" placeholder="Confirm Password" onChange={handleChange} />
 
-          {/* ✅ Show captcha ONLY in web */}
           {!isMobileApp && (
-            <ReCAPTCHA
-              sitekey="6Ldq9rgsAAAAALvm34GVkMbm-IN3DRMre1JS-YS8"
-              onChange={(value) => setCaptcha(value)}
-            />
+            <div className="flex justify-center">
+              <ReCAPTCHA
+                sitekey="6Ldq9rgsAAAAALvm34GVkMbm-IN3DRMre1JS-YS8"
+                onChange={(value) => setCaptcha(value)}
+              />
+            </div>
           )}
 
           <button
             onClick={handleSubmit}
-            className="w-full bg-white text-purple-700 font-bold py-2 rounded-xl hover:scale-105 transition"
+            className="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition"
           >
             Sign Up
           </button>
 
-          {/* 🔥 Switch to Login */}
-          <p className="text-center text-white mt-3">
+          <p className="text-center text-sm text-gray-600">
             Already have an account?{" "}
             <span
-              className="underline cursor-pointer font-bold"
+              className="text-blue-600 font-semibold cursor-pointer"
               onClick={() => navigate("/login")}
             >
               Login
             </span>
           </p>
-
         </div>
       </div>
 
       <style>{`
         .input {
           width: 100%;
-          padding: 10px 12px;
-          border-radius: 12px;
-          background: rgba(255,255,255,0.15);
-          color: white;
+          padding: 12px;
+          border-radius: 10px;
+          border: 1px solid #ddd;
           outline: none;
+          font-size: 14px;
         }
 
-        .input::placeholder {
-          color: rgba(255,255,255,0.7);
-        }
-
-        select.input option {
-          color: black;
+        .input:focus {
+          border-color: #2563eb;
+          box-shadow: 0 0 0 2px rgba(37,99,235,0.1);
         }
       `}</style>
-
     </div>
   );
 }

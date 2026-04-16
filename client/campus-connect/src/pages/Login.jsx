@@ -28,7 +28,7 @@ export default function Login() {
       const res = await axios.post("http://192.168.29.72:5000/api/auth/login", {
         email: data.email,
         password: data.password,
-        captcha: captcha || "mobile-bypass"
+        captcha: captcha || "mobile-bypass",
       });
 
       const user = res.data.user;
@@ -39,21 +39,24 @@ export default function Login() {
       else navigate("/dashboard");
 
     } catch (err) {
-      console.log(err.response?.data);
       setError(err.response?.data?.error || "Login failed");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
 
-      <div className="w-full max-w-md bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/20">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6">
 
-        <h2 className="text-2xl font-bold text-white text-center mb-6">
-          Welcome Back 👋
-        </h2>
+        <div className="text-center mb-6">
+          <div className="text-3xl">🎓</div>
+          <h2 className="text-2xl font-bold mt-2">Welcome Back</h2>
+          <p className="text-gray-500 text-sm">
+            Sign in to your Student Lifecycle account
+          </p>
+        </div>
 
-        {error && <p className="text-red-300 text-center mb-3">{error}</p>}
+        {error && <p className="text-red-500 text-center mb-3">{error}</p>}
 
         <div className="space-y-4">
 
@@ -70,7 +73,6 @@ export default function Login() {
             onChange={(e) => setData({ ...data, password: e.target.value })}
           />
 
-          {/* ✅ Show captcha ONLY in web */}
           {!isMobileApp && (
             <div className="flex justify-center">
               <ReCAPTCHA
@@ -82,40 +84,38 @@ export default function Login() {
 
           <button
             onClick={handleLogin}
-            className="w-full bg-white text-indigo-700 font-bold py-2 rounded-xl hover:scale-105 transition"
+            className="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition"
           >
             Login
           </button>
 
-          {/* 🔥 Switch to Signup */}
-          <p className="text-center text-white mt-3">
+          <p className="text-center text-sm text-gray-600">
             Don't have an account?{" "}
             <span
-              className="underline cursor-pointer font-bold"
+              className="text-blue-600 font-semibold cursor-pointer"
               onClick={() => navigate("/signup")}
             >
-              Sign Up
+              Sign up
             </span>
           </p>
-
         </div>
       </div>
 
       <style>{`
         .input {
           width: 100%;
-          padding: 10px 12px;
-          border-radius: 12px;
-          background: rgba(255,255,255,0.15);
-          color: white;
+          padding: 12px;
+          border-radius: 10px;
+          border: 1px solid #ddd;
           outline: none;
+          font-size: 14px;
         }
 
-        .input::placeholder {
-          color: rgba(255,255,255,0.7);
+        .input:focus {
+          border-color: #2563eb;
+          box-shadow: 0 0 0 2px rgba(37,99,235,0.1);
         }
       `}</style>
-
     </div>
   );
 }

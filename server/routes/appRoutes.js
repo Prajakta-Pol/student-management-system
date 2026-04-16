@@ -522,4 +522,50 @@ router.post("/team/join", (req, res) => {
     }
   );
 });
+// =======================================
+// 🎯 DASHBOARD DATA
+// =======================================
+router.get("/dashboard/:userId", (req, res) => {
+  const userId = req.params.userId;
+
+  let data = {};
+
+  // 1. POINTS (already stored in users table)
+  db.get(
+    "SELECT points FROM users WHERE id = ?",
+    [userId],
+    (err, row) => {
+      data.points = row?.points || 0;
+
+      // 2. EVENTS ATTENDED
+      db.get(
+        "SELECT COUNT(*) as count FROM event_attendance WHERE userId=? AND verified=1",
+        [userId],
+        (err, events) => {
+          data.events = events.count;
+
+          // 3. CERTIFICATIONS
+          db.get(
+            "SELECT COUNT(*) as count FROM certifications WHERE userId=?",
+            [userId],
+            (err, certs) => {
+              data.certifications = certs.count;
+
+              // 4. COLLABORATIONS
+              db.get(
+                "SELECT COUNT(*) as count FROM collaborations WHERE userId=?",
+                [userId],
+                (err, collab) => {
+                  data.collaborations = collab.count;
+
+                  res.json(data);
+                }
+              );
+            }
+          );
+        }
+      );
+    }
+  );
+});
 module.exports = router;

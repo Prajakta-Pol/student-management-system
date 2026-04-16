@@ -5,10 +5,10 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100">
+   <div className="h-screen flex flex-col bg-gray-100">
 
-      {/* SCREEN CONTENT */}
-      <div className="flex-1 overflow-auto">
+      {/* PAGE CONTENT */}
+      <div className="flex-1 overflow-auto pb-16">
         <Outlet />
       </div>
 
