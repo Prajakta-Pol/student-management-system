@@ -25,7 +25,7 @@ export default function Login() {
     }
 
     try {
-      const res = await axios.post("http://192.168.29.72:5000/api/auth/login", {
+      const res = await axios.post("http://10.210.127.194:5000/api/auth/login", {
         email: data.email,
         password: data.password,
         captcha: captcha || "mobile-bypass",

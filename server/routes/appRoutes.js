@@ -14,23 +14,37 @@ router.post("/admin/create-event", (req, res) => {
     organizer,
     location,
     eventDate,
-    points
+    points,
+    registrationLink,
+    message
   } = req.body;
 
   const qrToken = Math.random().toString(36).substring(2, 12);
 
   db.run(
     `INSERT INTO events 
-    (title, description, organizer, location, eventDate, points, qrToken)
-    VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [title, description, organizer, location, eventDate, points, qrToken],
+    (title, description, organizer, location, eventDate, points, qrToken, registrationLink, message)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      title,
+      description,
+      organizer,
+      location,
+      eventDate,
+      points,
+      qrToken,
+      registrationLink,
+      message
+    ],
     function (err) {
-      if (err) {
+       if (err) {
+        console.log("DB ERROR:", err); // 🔥 ADD THIS
         return res.status(500).json({ error: err.message });
       }
 
+      console.log("EVENT CREATED:", this.lastID, qrToken); // 🔥 DEBUG
+
       res.json({
-        message: "Event created successfully",
         eventId: this.lastID,
         qrToken
       });
@@ -103,9 +117,10 @@ router.post("/scan-qr", (req, res) => {
 
       // insert or ignore attendance
       db.run(
-        `INSERT OR IGNORE INTO event_attendance (userId, eventId, qrScanned)
-         VALUES (?, ?, 1)`,
-        [userId, eventId],
+  `INSERT OR IGNORE INTO event_attendance 
+   (userId, eventId, qrScanned, verified)
+   VALUES (?, ?, 1, 1)`,
+  [userId, eventId],
         (err) => {
           if (err) return res.status(500).json({ error: err.message });
 
@@ -439,6 +454,9 @@ router.post("/academic", (req, res) => {
   );
 });
 
+// =======================================
+// 🎯 CREATE TEAM (FIXED)
+// =======================================
 router.post("/team/create", (req, res) => {
   const {
     creatorId,
@@ -453,7 +471,8 @@ router.post("/team/create", (req, res) => {
     linkedin
   } = req.body;
 
-  if (!eventTitle || !totalMembers || !currentMembers || !requiredMembers || !requiredSkills || !email) {
+  // ✅ Only essential fields required
+  if (!eventTitle || !requiredSkills || !email) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
@@ -464,23 +483,28 @@ router.post("/team/create", (req, res) => {
     [
       creatorId,
       eventTitle,
-      eventDescription,
-      eventLink,
-      totalMembers,
-      currentMembers,
-      requiredMembers,
+      eventDescription || "",
+      eventLink || "",
+      totalMembers || 0,
+      currentMembers || 0,
+      requiredMembers || 0,
       requiredSkills,
       email,
-      linkedin
+      linkedin || ""
     ],
     function (err) {
-      if (err) return res.status(500).json({ error: err.message });
+      if (err) {
+        console.log("TEAM CREATE ERROR:", err);
+        return res.status(500).json({ error: err.message });
+      }
 
-      res.json({ message: "Team post created", id: this.lastID });
+      res.json({
+        message: "Team created successfully",
+        id: this.lastID
+      });
     }
   );
 });
-
 
 // GET ALL POSTS (FILTER SUPPORT)
 router.get("/team", (req, res) => {
@@ -568,4 +592,80 @@ router.get("/dashboard/:userId", (req, res) => {
     }
   );
 });
+// =======================================
+// 🎯 CHECK ATTENDANCE STATUS
+// =======================================
+router.get("/check-attendance", (req, res) => {
+  const { userId, eventId } = req.query;
+
+  db.get(
+    "SELECT * FROM event_attendance WHERE userId=? AND eventId=?",
+    [userId, eventId],
+    (err, row) => {
+      if (err) return res.status(500).json({ error: err.message });
+
+      res.json({
+        attended: !!row,
+        verified: row?.verified || 0
+      });
+    }
+  );
+});
+
+// =======================================
+// 🎯 GET TEAM REQUESTS
+// =======================================
+router.get("/team/requests/:teamId", (req, res) => {
+  const { teamId } = req.params;
+
+  db.all(
+    `SELECT tr.id, tr.message, u.fullName, u.email
+     FROM team_requests tr
+     JOIN users u ON u.id = tr.userId
+     WHERE tr.teamId = ?`,
+    [teamId],
+    (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+
+      res.json(rows);
+    }
+  );
+});
+
+// =======================================
+// 🎯 ACCEPT TEAM REQUEST
+// =======================================
+router.post("/team/accept", (req, res) => {
+  const { requestId } = req.body;
+
+  db.run(
+    "DELETE FROM team_requests WHERE id = ?",
+    [requestId],
+    (err) => {
+      if (err) return res.status(500).json({ error: err.message });
+
+      res.json({ message: "Request accepted ✅" });
+    }
+  );
+});
+
+// =======================================
+// 🎯 ADMIN STATS (EVENT COUNT)
+// =======================================
+// =======================================
+// 🎯 ADMIN STATS (COUNT + LIST)
+// =======================================
+router.get("/admin/stats", (req, res) => {
+
+  db.all("SELECT * FROM events ORDER BY id DESC", [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    res.json({
+      totalEvents: rows.length,
+      events: rows
+    });
+  });
+
+});
+
 module.exports = router;

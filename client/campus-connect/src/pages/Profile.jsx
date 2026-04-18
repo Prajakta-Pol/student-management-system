@@ -4,39 +4,18 @@ import axios from "axios";
 export default function Profile() {
   const user = JSON.parse(localStorage.getItem("user"));
 
-  const [form, setForm] = useState({
-    fullName: "",
-    usn: "",
-    email: "",
-    phone: "",
-    department: "",
-    college: "",
-    goal: "",
-    techSkills: "",
-    softSkills: "",
-    github: "",
-    linkedin: "",
-    portfolio: "",
-    profileImage: "" // ✅ NEW
-  });
-
+  const [form, setForm] = useState({});
   const [isEditing, setIsEditing] = useState(false);
 
   const fetchProfile = async () => {
-    try {
-      const res = await axios.get(
-        `http://192.168.29.72:5000/api/app/profile/${user.id}`
-      );
-      if (res.data) {
-        setForm(res.data);
-    } 
-  }catch (err) {
-      console.log(err);
-    }
+    const res = await axios.get(
+      `http://10.210.127.194:5000/api/app/profile/${user.id}`
+    );
+    if (res.data) setForm(res.data);
   };
 
   const saveProfile = async () => {
-    await axios.post("http://192.168.29.72:5000/api/app/profile", {
+    await axios.post("http://10.210.127.194:5000/api/app/profile", {
       userId: user.id,
       ...form
     });
@@ -44,87 +23,66 @@ export default function Profile() {
     fetchProfile();
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
-  // ✅ IMAGE HANDLER
   const handleImage = (e) => {
-  const file = e.target.files[0];
+    const file = e.target.files[0];
+    if (!file) return;
 
-  if (!file) return;
-
-  // ✅ LIMIT SIZE (1MB)
-  if (file.size > 1024 * 1024) {
-    alert("Image too large! Please select image under 1MB.");
-    return;
-  }
-
-  const reader = new FileReader();
-
-  reader.onloadend = () => {
-    setForm({
-      ...form,
-      profileImage: reader.result
-    });
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setForm({ ...form, profileImage: reader.result });
+    };
+    reader.readAsDataURL(file);
   };
-
-  reader.readAsDataURL(file);
-};
 
   useEffect(() => {
     fetchProfile();
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-20">
+    <div className="min-h-screen bg-gray-50 pb-20">
 
       {/* HEADER */}
-      <div className="bg-white p-4 shadow flex items-center gap-3">
+      <div className="profile-header">
         <div className="avatar">
           {form.profileImage ? (
-            <img src={form.profileImage} className="img" />
+            <img src={form.profileImage} />
           ) : (
             form.fullName?.charAt(0) || "U"
           )}
         </div>
 
-        <div>
-          <h2 className="font-bold text-lg">
-            {form.fullName || user?.name || "Student Name"}
-          </h2>
-          <p className="text-sm text-gray-500">
-            {form.email || "email@example.com"}
-          </p>
-        </div>
+        <h2 className="name">{form.fullName || "Student Name"}</h2>
+        <p className="email">{form.email || "email@example.com"}</p>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-5">
 
-        {/* 🔥 VIEW MODE */}
         {!isEditing ? (
           <>
+            {/* BASIC INFO */}
             <div className="card">
-              <h3 className="title">Basic Information</h3>
+              <h3 className="section-title">Basic Information</h3>
 
-              <div className="row">
-                <div><label>USN</label><p>{form.usn || "-"}</p></div>
-                <div><label>Department</label><p>{form.department || "-"}</p></div>
-              </div>
-
-              <div className="row">
-                <div><label>College</label><p>{form.college || "-"}</p></div>
-                <div><label>Phone</label><p>{form.phone || "-"}</p></div>
+              <div className="info-grid">
+                <Info label="USN" value={form.usn} />
+                <Info label="Department" value={form.department} />
+                <Info label="College" value={form.college} />
+                <Info label="Phone" value={form.phone} />
               </div>
             </div>
 
+            {/* GOAL */}
             <div className="card">
-              <h3 className="title">Career Goal</h3>
-              <p>{form.goal || "-"}</p>
+              <h3 className="section-title">Career Goal</h3>
+              <p className="text">{form.goal || "-"}</p>
             </div>
 
+            {/* SKILLS */}
             <div className="card">
-              <h3 className="title">Skills</h3>
+              <h3 className="section-title">Skills</h3>
               <p><b>Tech:</b> {form.techSkills || "-"}</p>
               <p><b>Soft:</b> {form.softSkills || "-"}</p>
             </div>
@@ -134,30 +92,31 @@ export default function Profile() {
             </button>
           </>
         ) : (
+          <div className="card space-y-3">
+            <h3 className="section-title">Edit Profile</h3>
 
-        /* ✏️ EDIT MODE */
-          <div className="card space-y-2">
-
-            <h3 className="title">Edit Profile</h3>
-
-            {/* IMAGE UPLOAD */}
             <input type="file" onChange={handleImage} />
 
-            <input className="input" name="fullName" value={form.fullName} onChange={handleChange} placeholder="Full Name" />
-            <input className="input" name="usn" value={form.usn} onChange={handleChange} placeholder="USN" />
-            <input className="input" name="email" value={form.email} onChange={handleChange} placeholder="Email" />
-            <input className="input" name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" />
+            <div className="grid-2">
+              <input className="input" name="fullName" value={form.fullName || ""} onChange={handleChange} placeholder="Full Name" />
+              <input className="input" name="usn" value={form.usn || ""} onChange={handleChange} placeholder="USN" />
+            </div>
 
-            <input className="input" name="department" value={form.department} onChange={handleChange} placeholder="Department" />
-            <input className="input" name="college" value={form.college} onChange={handleChange} placeholder="College" />
+            <div className="grid-2">
+              <input className="input" name="email" value={form.email || ""} onChange={handleChange} placeholder="Email" />
+              <input className="input" name="phone" value={form.phone || ""} onChange={handleChange} placeholder="Phone" />
+            </div>
 
-            <textarea className="input" name="goal" value={form.goal} onChange={handleChange} placeholder="Goal" />
+            <input className="input" name="department" value={form.department || ""} onChange={handleChange} placeholder="Department" />
+            <input className="input" name="college" value={form.college || ""} onChange={handleChange} placeholder="College" />
 
-            <input className="input" name="techSkills" value={form.techSkills} onChange={handleChange} placeholder="Tech Skills" />
-            <input className="input" name="softSkills" value={form.softSkills} onChange={handleChange} placeholder="Soft Skills" />
+            <textarea className="input" name="goal" value={form.goal || ""} onChange={handleChange} placeholder="Career Goal" />
 
-            <input className="input" name="github" value={form.github} onChange={handleChange} placeholder="GitHub" />
-            <input className="input" name="linkedin" value={form.linkedin} onChange={handleChange} placeholder="LinkedIn" />
+            <input className="input" name="techSkills" value={form.techSkills || ""} onChange={handleChange} placeholder="Tech Skills" />
+            <input className="input" name="softSkills" value={form.softSkills || ""} onChange={handleChange} placeholder="Soft Skills" />
+
+            <input className="input" name="github" value={form.github || ""} onChange={handleChange} placeholder="GitHub" />
+            <input className="input" name="linkedin" value={form.linkedin || ""} onChange={handleChange} placeholder="LinkedIn" />
 
             <button className="btn-save" onClick={saveProfile}>Save</button>
             <button className="btn-cancel" onClick={() => setIsEditing(false)}>Cancel</button>
@@ -166,19 +125,40 @@ export default function Profile() {
       </div>
 
       <style>{`
-        .avatar {
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          background: #4f46e5;
+        .profile-header {
+          background: linear-gradient(to right, #E0AC69, #2563eb);
           color: white;
+          text-align: center;
+          padding: 30px 10px;
+          border-radius: 0 0 20px 20px;
+        }
+
+        .name {
+          font-size: 20px;
+          font-weight: 600;
+        }
+
+        .email {
+          font-size: 13px;
+          opacity: 0.9;
+        }
+
+        .avatar {
+          width: 80px;
+          height: 80px;
+          margin: auto;
+          border-radius: 50%;
+          background: white;
+          color: #E0AC69;
           display: flex;
           align-items: center;
           justify-content: center;
+          font-size: 28px;
           overflow: hidden;
+          margin-bottom: 10px;
         }
 
-        .img {
+        .avatar img {
           width: 100%;
           height: 100%;
           object-fit: cover;
@@ -186,36 +166,52 @@ export default function Profile() {
 
         .card {
           background: white;
-          padding: 15px;
-          border-radius: 12px;
+          padding: 16px;
+          border-radius: 14px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
 
-        .row {
-          display: flex;
-          justify-content: space-between;
+        .section-title {
+          font-size: 14px;
+          font-weight: 600;
+          color: #2563eb;
+          margin-bottom: 10px;
+          border-left: 4px solid #2563eb;
+          padding-left: 8px;
         }
 
-        .row div {
-          width: 48%;
+        .info-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+        }
+
+        .text {
+          color: #555;
         }
 
         .input {
-          width: 100%;
           padding: 10px;
-          border: 1px solid #ccc;
-          border-radius: 8px;
+          border-radius: 10px;
+          border: 1px solid #ddd;
+        }
+
+        .grid-2 {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
         }
 
         .btn {
           width: 100%;
-          background: #4f46e5;
+          background: #2563eb;
           color: white;
           padding: 10px;
           border-radius: 10px;
         }
 
         .btn-save {
-          background: green;
+          background: #16a34a;
           color: white;
           padding: 10px;
           border-radius: 10px;
@@ -228,6 +224,16 @@ export default function Profile() {
           border-radius: 10px;
         }
       `}</style>
+    </div>
+  );
+}
+
+/* SMALL COMPONENT */
+function Info({ label, value }) {
+  return (
+    <div>
+      <p style={{ fontSize: "12px", color: "#888" }}>{label}</p>
+      <p style={{ fontWeight: "500" }}>{value || "-"}</p>
     </div>
   );
 }

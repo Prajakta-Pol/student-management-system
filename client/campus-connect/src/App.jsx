@@ -12,7 +12,9 @@ import Resume from "./pages/Resume";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import Mentor from "./pages/Mentor";
-
+import EventDetails from "./pages/EventDetails";
+import QRScanner from "./pages/QRScanner";
+import AdminStats from "./pages/AdminStats";
 // OPTIONAL (create later if needed)
 // import Settings from "./pages/Settings";
 
@@ -27,7 +29,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/mentor" element={<Mentor />} />
-
+        <Route path="/admin/stats" element={<AdminStats />} />
         {/* MAIN APP */}
         <Route path="/dashboard" element={<Dashboard />}>
 
@@ -37,7 +39,8 @@ function App() {
           <Route path="collaborate" element={<Collaborate />} />
           <Route path="resume" element={<Resume />} />
           <Route path="profile" element={<Profile />} />
-
+          <Route path="events/:id" element={<EventDetails />} />
+          <Route path="scan" element={<QRScanner />} />
           {/* DEFAULT ROUTE */}
           <Route index element={<Navigate to="home" replace />} />
 

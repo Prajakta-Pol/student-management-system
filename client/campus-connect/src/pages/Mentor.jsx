@@ -9,12 +9,12 @@ export default function Mentor() {
   const mentor = JSON.parse(localStorage.getItem("user"));
 
   const fetchStudents = async () => {
-    const res = await axios.get("http://192.168.29.72:5000/api/app/mentor/students");
+    const res = await axios.get("http://10.210.127.194/api/app/mentor/students");
     setStudents(res.data);
   };
 
   const submitFeedback = async (studentId) => {
-    await axios.post("http://192.168.29.72:5000/api/app/mentor/feedback", {
+    await axios.post("http://10.210.127.194/api/app/mentor/feedback", {
       userId: studentId,
       mentorId: mentor.id,
       feedback,

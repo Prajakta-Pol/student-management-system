@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { API } from "../api";
 
 export default function Collaborate() {
   const [posts, setPosts] = useState([]);
-  const [skillFilter, setSkillFilter] = useState("");
-  const [memberFilter, setMemberFilter] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const [form, setForm] = useState({
     eventTitle: "",
@@ -20,131 +20,218 @@ export default function Collaborate() {
 
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // FETCH POSTS
+  // =========================
+  // 🔥 FETCH ALL TEAMS
+  // =========================
   const fetchPosts = async () => {
-    const res = await axios.get("http://192.168.29.72:5000/api/team", {
-      params: {
-        skill: skillFilter,
-        members: memberFilter
-      }
-    });
-    setPosts(res.data);
+    try {
+      const res = await API.get("/app/team");
+      setPosts(res.data);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   useEffect(() => {
     fetchPosts();
   }, []);
 
-  // CREATE TEAM
+  // =========================
+  // ✅ CREATE TEAM
+  // =========================
   const createPost = async () => {
+    setMessage("");
+    setError("");
+
     if (!form.eventTitle || !form.requiredSkills || !form.email) {
-      alert("Fill required fields");
+      setError("Please fill required fields ❌");
       return;
     }
 
-    await axios.post("http://192.168.29.72:5000/api/team/create", {
-      ...form,
-      creatorId: user.id
-    });
+    try {
+      await API.post("/app/team/create", {
+        creatorId: user.id,
+        eventTitle: form.eventTitle,
+        eventDescription: form.eventDescription || "",
+        eventLink: form.eventLink || "",
+        totalMembers: Number(form.totalMembers) || 0,
+        currentMembers: Number(form.currentMembers) || 0,
+        requiredMembers: Number(form.requiredMembers) || 0,
+        requiredSkills: form.requiredSkills,
+        email: form.email,
+        linkedin: form.linkedin || ""
+      });
 
-    fetchPosts();
+      setMessage("🎉 Team created successfully!");
+
+      setForm({
+        eventTitle: "",
+        eventDescription: "",
+        eventLink: "",
+        totalMembers: "",
+        currentMembers: "",
+        requiredMembers: "",
+        requiredSkills: "",
+        email: "",
+        linkedin: ""
+      });
+
+      fetchPosts();
+
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to create team ❌");
+    }
   };
 
-  // JOIN TEAM
+  // =========================
+  // 🔥 JOIN TEAM
+  // =========================
   const joinTeam = async (teamId) => {
-    await axios.post("http://192.168.29.72:5000/api/team/join", {
-      teamId,
-      userId: user.id,
-      message: "Interested to join"
-    });
+    setMessage("");
+    setError("");
 
-    alert("Request Sent");
+    try {
+      await API.post("/app/team/join", {
+        teamId,
+        userId: user.id,
+        message: "Interested to join"
+      });
+
+      setMessage("✅ Request sent successfully!");
+
+    } catch (err) {
+      setError("Failed to send request ❌");
+    }
   };
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 space-y-5 pb-24 max-w-xl mx-auto">
 
-      <h1 className="text-xl font-bold">Event Collaboration Hub</h1>
+      <h1 className="text-2xl font-bold text-center">
+        Collaboration Hub 🤝
+      </h1>
 
-      {/* FILTER */}
-      <div className="flex gap-2">
+      {/* STATUS */}
+      {message && <div className="success">{message}</div>}
+      {error && <div className="error">{error}</div>}
+
+      {/* =========================
+          CREATE TEAM FORM
+      ========================= */}
+      <div className="card space-y-2">
+
         <input
-          placeholder="Skill (React, ML...)"
-          onChange={(e) => setSkillFilter(e.target.value)}
-          className="border p-2"
+          placeholder="Event Title *"
+          value={form.eventTitle}
+          onChange={(e) => setForm({ ...form, eventTitle: e.target.value })}
+          className="input"
         />
+
         <input
-          placeholder="Members Needed"
-          onChange={(e) => setMemberFilter(e.target.value)}
-          className="border p-2"
-        />
-        <button onClick={fetchPosts} className="bg-blue-500 text-white px-3">
-          Search
-        </button>
-      </div>
-
-      {/* CREATE TEAM */}
-      <div className="bg-white p-4 shadow space-y-2">
-        <input placeholder="Event Title *"
-          onChange={(e) => setForm({...form, eventTitle: e.target.value})}
-          className="border p-2 w-full"
+          placeholder="Required Skills *"
+          value={form.requiredSkills}
+          onChange={(e) => setForm({ ...form, requiredSkills: e.target.value })}
+          className="input"
         />
 
-        <input placeholder="Event Link"
-          onChange={(e) => setForm({...form, eventLink: e.target.value})}
-          className="border p-2 w-full"
+        <input
+          placeholder="Email *"
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+          className="input"
         />
 
-        <input placeholder="Total Members *"
-          onChange={(e) => setForm({...form, totalMembers: e.target.value})}
-          className="border p-2 w-full"
-        />
-
-        <input placeholder="Current Members *"
-          onChange={(e) => setForm({...form, currentMembers: e.target.value})}
-          className="border p-2 w-full"
-        />
-
-        <input placeholder="Required Members *"
-          onChange={(e) => setForm({...form, requiredMembers: e.target.value})}
-          className="border p-2 w-full"
-        />
-
-        <input placeholder="Required Skills *"
-          onChange={(e) => setForm({...form, requiredSkills: e.target.value})}
-          className="border p-2 w-full"
-        />
-
-        <input placeholder="Email *"
-          onChange={(e) => setForm({...form, email: e.target.value})}
-          className="border p-2 w-full"
-        />
-
-        <input placeholder="LinkedIn (optional)"
-          onChange={(e) => setForm({...form, linkedin: e.target.value})}
-          className="border p-2 w-full"
-        />
-
-        <button onClick={createPost} className="bg-green-600 text-white px-4 py-2">
+        <button onClick={createPost} className="btn">
           Create Team
         </button>
+
       </div>
 
-      {/* POSTS */}
-      {posts.map((p) => (
-        <div key={p.id} className="bg-gray-100 p-3 rounded">
-          <h2 className="font-bold">{p.eventTitle}</h2>
-          <p>{p.requiredSkills}</p>
-          <p>{p.currentMembers}/{p.totalMembers} members</p>
+      {/* =========================
+          🔥 AVAILABLE TEAMS
+      ========================= */}
+      <div className="space-y-3">
 
-          <button
-            onClick={() => joinTeam(p.id)}
-            className="bg-indigo-500 text-white px-3 py-1 mt-2"
-          >
-            Request to Join
-          </button>
-        </div>
-      ))}
+        <h2 className="font-semibold text-lg">Available Teams</h2>
+
+        {posts.map((p) => (
+          <div key={p.id} className="card">
+
+            <h2 className="font-semibold">{p.eventTitle}</h2>
+            <p className="text-sm text-gray-500">{p.requiredSkills}</p>
+
+            <p className="text-xs mb-2">
+              {p.currentMembers}/{p.totalMembers} members
+            </p>
+
+            {/* 🔥 JOIN BUTTON */}
+            {p.creatorId !== user.id ? (
+              <button
+                onClick={() => joinTeam(p.id)}
+                className="btn-join"
+              >
+                Request to Join
+              </button>
+            ) : (
+              <span className="text-xs text-gray-400">
+                Your Team
+              </span>
+            )}
+
+          </div>
+        ))}
+
+      </div>
+
+      {/* =========================
+          STYLES
+      ========================= */}
+      <style>{`
+        .card {
+          background: white;
+          padding: 14px;
+          border-radius: 14px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        .input {
+          width: 100%;
+          padding: 10px;
+          border-radius: 10px;
+          border: 1px solid #ddd;
+        }
+
+        .btn {
+          background: #2563eb;
+          color: white;
+          padding: 10px;
+          border-radius: 10px;
+          font-weight: 600;
+          width: 100%;
+        }
+
+        .btn-join {
+          background: #16a34a;
+          color: white;
+          padding: 8px;
+          border-radius: 10px;
+          width: 100%;
+        }
+
+        .success {
+          background: #dcfce7;
+          color: #166534;
+          padding: 10px;
+          border-radius: 10px;
+        }
+
+        .error {
+          background: #fee2e2;
+          color: #991b1b;
+          padding: 10px;
+          border-radius: 10px;
+        }
+      `}</style>
 
     </div>
   );

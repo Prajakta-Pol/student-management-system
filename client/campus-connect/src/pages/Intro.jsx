@@ -20,7 +20,7 @@ export default function Intro() {
       <div className="relative z-10 h-full flex flex-col justify-center items-center text-white px-6 text-center">
 
         <h1 className="text-4xl font-bold mb-4">
-          StudentLife 🎓
+          Campus Connect 🎓
         </h1>
 
         <p className="max-w-md text-gray-200 mb-6">

@@ -38,7 +38,7 @@ export default function Signup() {
     }
 
     try {
-      await axios.post("http://192.168.29.72:5000/api/auth/signup", {
+      await axios.post("http://10.210.127.194:5000/api/auth/signup", {
         fullName: form.fullName,
         email: form.email,
         password: form.password,
@@ -51,8 +51,14 @@ export default function Signup() {
 
       setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
-      setError(err.response?.data?.error || "Signup failed");
-    }
+  const msg = err.response?.data?.error || err.message;
+
+  console.log("SIGNUP ERROR:", msg);
+
+  alert("ERROR: " + msg);   // 🔥 THIS LINE
+
+  setError(msg);
+}
   };
 
   return (

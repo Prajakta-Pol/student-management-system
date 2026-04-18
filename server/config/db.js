@@ -33,18 +33,20 @@ db.serialize(() => {
   // 🎯 EVENTS TABLE
   // =========================
   db.run(`
-    CREATE TABLE IF NOT EXISTS events (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT,
-      description TEXT,
-      organizer TEXT,
-      location TEXT,
-      eventDate TEXT,
-      points INTEGER DEFAULT 0,
-      qrToken TEXT,
-      status TEXT DEFAULT 'active'
-    )
-  `);
+  CREATE TABLE IF NOT EXISTS events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT,
+    description TEXT,
+    organizer TEXT,
+    location TEXT,
+    eventDate TEXT,
+    points INTEGER DEFAULT 0,
+    qrToken TEXT,
+    registrationLink TEXT,
+    message TEXT,
+    status TEXT DEFAULT 'active'
+  )
+`);
 
   // =========================
   // 🧾 EVENT REGISTRATION
@@ -108,7 +110,7 @@ db.serialize(() => {
     )
   `);
   //db.run(`
- //DROP TABLE IF EXISTS profiles;
+ //DROP TABLE IF EXISTS events;
 //`);
   db.run(`
   CREATE TABLE IF NOT EXISTS profiles (

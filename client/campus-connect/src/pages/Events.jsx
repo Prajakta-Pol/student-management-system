@@ -1,59 +1,96 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { API } from "../api";
+import { useNavigate } from "react-router-dom";
 
 export default function Events() {
   const [events, setEvents] = useState([]);
+  const [attendance, setAttendance] = useState([]);
+
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
+
+  useEffect(() => {
+    fetchEvents();
+    fetchAttendance();
+  }, []);
 
   const fetchEvents = async () => {
     try {
-      const res = await axios.get("http://192.168.29.72:5000/api/app/events");
+      const res = await API.get("/app/events");
       setEvents(res.data);
     } catch (err) {
       console.log(err);
     }
   };
 
-  // ✅ FIXED API
-  const joinEvent = async (id) => {
+  const fetchAttendance = async () => {
     try {
-      await axios.post("http://192.168.29.72:5000/api/app/register-event", {
-        userId: user.id,
-        eventId: id,
-      });
-
-      alert("🎉 Registered Successfully!");
+      const res = await API.get(`/app/user/${user.id}/attendance`);
+      setAttendance(res.data);
     } catch (err) {
-      console.log(err.response?.data || err.message);
+      console.log(err);
     }
   };
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
+  const isAttended = (title) =>
+    attendance.some((a) => a.title === title && a.verified === 1);
 
   return (
     <div className="p-4 space-y-4 pb-20">
-      <h1 className="text-xl font-bold">Events 🎯</h1>
+
+      <h1 className="text-2xl font-bold">Events 🎯</h1>
 
       {events.length === 0 ? (
-        <p className="text-gray-500">No events available</p>
+        <p className="text-gray-400 text-sm">No events available</p>
       ) : (
         events.map((e) => (
-          <div key={e.id} className="bg-white p-4 rounded shadow">
-            <h2 className="font-semibold">{e.title}</h2>
-            <p className="text-gray-600">{e.description}</p>
-            <p className="mt-1">🏆 Points: {e.points}</p>
+          <div key={e.id} className="card space-y-2">
+
+            <div className="flex justify-between items-center">
+              <h2 className="font-semibold">{e.title}</h2>
+              <span className="text-xs text-gray-500">{e.eventDate}</span>
+            </div>
+
+            <p className="text-sm text-gray-500 line-clamp-2">
+              {e.description}
+            </p>
+
+            {isAttended(e.title) && (
+              <span className="text-green-600 text-xs font-medium">
+                ✅ Attended
+              </span>
+            )}
 
             <button
-              onClick={() => joinEvent(e.id)}
-              className="mt-2 bg-green-600 text-white px-3 py-1 rounded"
+              onClick={() => navigate(`/dashboard/events/${e.id}`)}
+              className="btn"
             >
-              Register Event
+              View Details
             </button>
+
           </div>
         ))
       )}
+
+      <style>{`
+        .card {
+          background: white;
+          padding: 14px;
+          border-radius: 14px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        .btn {
+          width: 100%;
+          background: #2563eb;
+          color: white;
+          padding: 10px;
+          border-radius: 10px;
+          font-size: 14px;
+          font-weight: 600;
+        }
+      `}</style>
+
     </div>
   );
 }

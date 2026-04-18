@@ -1,5 +1,9 @@
 {
-  "appId": "com.campus.app",
-  "appName": "campus-connect",
-  "webDir": "dist"
+  "appId": "com.example.app",
+  "appName": "StudentLife",
+  "webDir": "dist",
+
+  "server": {
+    "androidScheme": "http"
+  }
 }
